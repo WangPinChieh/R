@@ -24,7 +24,13 @@ leadership$age[age == 99] <- NA
 # elimates any rows with missing data
 newData <- na.omit(leadership)
 
-newData
+#transforms Date
+newData$date <- as.Date(newData$date, "%m/%d/%y")
+
+#sorting
+newData <- newData[order(newData$gender, newData$age),]
+
+
 
 
 
@@ -40,4 +46,29 @@ mydata <- within(mydata, {
   mark[x1>3] <- 'B'
   mark[x1>5] <- 'C'
 })
-mydata
+
+mydates <- as.Date(c("2015/06/23", "2015/6/24"), "%Y/%m/%d")
+
+today <- Sys.Date()
+dob <- as.Date("1989/10/13", "%Y/%m/%d")
+difftime(today, dob, units="weeks")
+
+
+#inner join
+extraColumn <- data.frame(x2=c(2,3,4,8), H=c("i","j","k","l"))
+total <- merge(mydata, extraColumn, by="x2")
+
+
+#add a new row data
+extraRow <- data.frame(x1=c(9),x2=(7), H="m", mark="C")
+extraRow <- within(extraRow, {
+  sumx = x1+x2
+  meanx =(x1+x2)/2
+})
+total <- rbind(total, extraRow)
+
+#taking off the 6th variable
+total <- total[c(-6)]
+
+
+
