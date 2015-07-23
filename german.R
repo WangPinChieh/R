@@ -16,10 +16,15 @@ test$purpose <- as.factor(test$purpose)
 
 
 summary(test)
-
-
-
-
+str(german)
+dim(german)
+var(german$age)
+hist(german$age)
+plot(density(german$age))
+table(german$job)
+pie(table(german$job))
+cor(german$age, german$class)
+aggregate(german$purpose ~ class, summary, data=german)
 
 # apply practices
 m <- matrix(c(1:3), nrow=1, ncol=3)
