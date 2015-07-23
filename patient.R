@@ -10,10 +10,10 @@ y <- patientdata$status
 x1 <- patientdata$age
 x2 <- patientdata$diabetes
 
-ml.logit <- glm(y ~ x1 + x2, family = binomial(link = "logit") ,data = patientdata)
+ml.logit <- glm(y ~ x1 + x2, family = binomial("logit") ,data = patientdata)
 summary(ml.logit)
 
-newdata <- data.frame(x1 = c(30), x2 = factor(c("Type2")))
+newdata <- data.frame(x1 = c(30,28,40), x2 = factor(c("Type2","Type2","Type2")))
 
 result <- predict(ml.logit, newdata)
 
