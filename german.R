@@ -1,4 +1,4 @@
-german<-read.csv(file="D:/R/german.csv", sep=",", header=TRUE)
+german<-read.csv(file="E:/R/german.csv", sep=",", header=TRUE)
 
 
 y <- factor(german$class)
@@ -25,7 +25,8 @@ table(german$job)
 pie(table(german$job))
 cor(german$age, german$class)
 aggregate(german$purpose ~ class, summary, data=german)
-
+aggregate(german$class ~ german$purpose,  summary, data=german)
+??aggregate
 # apply practices
 m <- matrix(c(1:3), nrow=1, ncol=3)
 
@@ -34,6 +35,52 @@ sapply(matrix(c(1:3), nrow=1, ncol=3), function(x) x^2)
 lapply(matrix(c(1:3), nrow=1, ncol=3), function(x) x^2)
 # end of apply practices
 
+# install.packages("ggplot2")
+library(ggplot2)
+qplot(german$age, german$employment, data=german, facets = class ~.)
 
+
+# install.packages("party")
+library(party)
+str(german)
+
+table(german$class)
+
+myFormula <- class ~ .
+
+german.1 <- german[german$class == 1,]
+german.2 <- german[german$class == 2,]
+
+
+german.train.1 <- german.1[sample(nrow(german.1), 490),]
+german.train.2 <- german.2[sample(nrow(german.2), 210),]
+german.test.1 <- german.1[!(german.1$ID %in% german.train.1$ID),]
+german.test.2 <- german.2[!(german.2$ID %in% german.train.2$ID),]
+
+table(german.train.1$class)
+table(german.train.2$class)
+
+table(german.test.1$class)
+table(german.test.2$class)
+
+
+german.train.merge <- rbind(german.train.1, german.train.2)
+german.test.merge <- rbind(german.test.1, german.test.2)
+
+table(german.train.merge$class)
+table(german.test.merge$class)
+
+myFormula <- class ~ .
+
+german_ctree <- ctree(myFormula, data=german.train.merge)
+
+table(predict(german_ctree), german.train.merge$class)
+
+print(german_ctree)
+plot(german_ctree, type="simple")
+
+
+testPred <- predict(german_ctree, newdata=german.test.merge)
+table(testPred, german.test.merge$class)
 
 
