@@ -1,10 +1,53 @@
-german<-read.csv(file="E:/R/german.csv", sep=",", header=TRUE)
+german<-read.csv(file="german.csv", sep=",", header=TRUE)
 
 # install.packages("party")
 library(party)
-
 library(rpart)
+# install.package("ROCR")
+library(ROCR)
+
+
+#---------------------------------------------------------------------
+#preparing training and testing dataset
+german.1 <- german[german$class == 1,]
+german.2 <- german[german$class == 2,]
+
+
+german.train.1 <- german.1[sample(nrow(german.1), 490),]
+german.train.2 <- german.2[sample(nrow(german.2), 210),]
+german.test.1 <- german.1[!(german.1$ID %in% german.train.1$ID),]
+german.test.2 <- german.2[!(german.2$ID %in% german.train.2$ID),]
+
+#table(german.train.1$class)
+#table(german.train.2$class)
+
+#table(german.test.1$class)
+#table(german.test.2$class)
+
+
+german.train.merge <- rbind(german.train.1, german.train.2)
+german.test.merge <- rbind(german.test.1, german.test.2)
+
+#table(german.train.merge$class)
+#table(german.test.merge$class)
+
+#end of preparing training and testing dataset
+#---------------------------------------------------------------------
+
 #data transformation
+
+#data analysis - age
+cor.test(german.train.merge$age, german.train.merge$class, method = "pearson")
+ana_age <- table(german.train.merge$age, german.train.merge$class)
+ana_age_frame <- as.data.frame.matrix(ana_age)
+ana_age_frame <- within(ana_age_frame, {
+  defaultProb <- NA
+  defaultProb <- ana_age_frame$`2` / (ana_age_frame$`1` + ana_age_frame$`2`)
+})
+
+# sorting by defaultProb field (placing a minus sign before means sorting in descending)
+ana_age_frame <- ana_age_frame[order(-ana_age_frame$defaultProb),]
+
 
 german$class <- as.factor(german$class)
 ageFormula <- class ~ age
@@ -22,46 +65,27 @@ german <- within(german, {
 
 #end of data transformation
 
-
-#preparing training and testing dataset
-german.1 <- german[german$class == 1,]
-german.2 <- german[german$class == 2,]
-
-
-german.train.1 <- german.1[sample(nrow(german.1), 490),]
-german.train.2 <- german.2[sample(nrow(german.2), 210),]
-german.test.1 <- german.1[!(german.1$ID %in% german.train.1$ID),]
-german.test.2 <- german.2[!(german.2$ID %in% german.train.2$ID),]
-
-table(german.train.1$class)
-table(german.train.2$class)
-
-table(german.test.1$class)
-table(german.test.2$class)
-
-
-german.train.merge <- rbind(german.train.1, german.train.2)
-german.test.merge <- rbind(german.test.1, german.test.2)
-
-table(german.train.merge$class)
-table(german.test.merge$class)
-
-#end of preparing training and testing dataset
+#---------------------------------------------------------------------
 
 
 #building decition tree
-myFormula <- class ~ checking_status+purpose+credit_amount+duration+savings_status+agecat
+myFormula <- class ~ checking_status+purpose+credit_amount+duration+savings_status+age
+mySecondFormula <- class ~ .
 
 german_tree <- rpart(myFormula, data=german.train.merge, control = rpart.control(maxdepth = 5))
-
-table(predict(german_tree))
-
+german_tree2 <- rpart(mySecondFormula, data=german.train.merge, control = rpart.control(maxdepth = 5))
 printcp(german_tree)
 plotcp(german_tree)
 summary(german_tree)
 
-testPred <- predict(german_ctree, newdata=german.test.merge)
-table(testPred, german.test.merge$class)
+# display expected and predicted result
+preds <- predict(german_tree, newdata = german.test.merge, type = "class")
+preds2 <- predict(german_tree2, newdata = german.test.merge, type = "class")
+table(german.test.merge$class,preds)
+table(german.test.merge$class,preds2)
+# end of display expected and predicted result
 
 
+
+#---------------------------------------------------------------------
 
