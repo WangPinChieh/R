@@ -47,6 +47,18 @@ ana_age_frame <- within(ana_age_frame, {
 
 # sorting by defaultProb field (placing a minus sign before means sorting in descending)
 ana_age_frame <- ana_age_frame[order(-ana_age_frame$defaultProb),]
+#end of data analysis - age
+
+
+
+#data analysis - duration
+ana_duration <- table(german.train.merge$duration, german.train.merge$class)
+ana_duration_frame <- as.data.frame.matrix(ana_duration)
+ana_duration_frame <- within(ana_duration_frame, {
+  defaultProb <- NA
+  defaultProb <- ana_duration_frame$`2`/(ana_duration_frame$`1`+ana_duration_frame$`2`)
+})
+
 
 
 german$class <- as.factor(german$class)
